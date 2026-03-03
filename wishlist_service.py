@@ -131,6 +131,10 @@ class MockDB:
     """
     Mock class for DB operations.
     """
+    def __init__(self):
+        self.wishlists = {}  # Stores {user_id: wishlist_id}
+        self.wishlist_items = {} # Stores {wishlist_id: {product_id: item_details}}
+
     def get_wishlist_id_by_user_id(self, user_id: str) -> str:
         """
         Retrieves the wishlist ID for a given user.
@@ -141,7 +145,7 @@ class MockDB:
         Returns:
             str: The wishlist ID.
         """
-        return None
+        return self.wishlists.get(user_id)
 
     def create_wishlist(self, wishlist_id: str, user_id: str, created_date: datetime) -> None:
         """
@@ -152,6 +156,8 @@ class MockDB:
             user_id (str): The ID of the user.
             created_date (datetime): The date the wishlist was created.
         """
+        self.wishlists[user_id] = wishlist_id
+        self.wishlist_items[wishlist_id] = {}
         print(f"Creating wishlist {wishlist_id} for user {user_id}")
 
     def add_wishlist_item(self, item_id: str, wishlist_id: str, product_id: str, added_date: datetime) -> None:
@@ -164,7 +170,10 @@ class MockDB:
             product_id (str): The ID of the product.
             added_date (datetime): The date the item was added.
         """
-        print(f"Adding item {item_id} to wishlist {wishlist_id}")
+        if wishlist_id not in self.wishlist_items:
+            self.wishlist_items[wishlist_id] = {}
+        self.wishlist_items[wishlist_id][product_id] = {"item_id": item_id, "added_date": added_date}
+        print(f"Adding item {item_id} (product {product_id}) to wishlist {wishlist_id}")
 
     def is_product_in_wishlist(self, wishlist_id: str, product_id: str) -> bool:
         """
@@ -177,7 +186,7 @@ class MockDB:
         Returns:
             bool: True if the product is in the wishlist, False otherwise.
         """
-        return False
+        return product_id in self.wishlist_items.get(wishlist_id, {})
 
 class MockCache:
     """
